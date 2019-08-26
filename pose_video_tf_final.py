@@ -11,7 +11,6 @@ global stack_l
 global stack_r
 stack_l = collections.deque(maxlen=1)
 stack_r = collections.deque(maxlen=1)
-print("XOXOX")
 stack_r.append((0,0,0))
 stack_l.append((0,0,0))
 def calculateDistance(x1,y1,x2,y2):  
@@ -43,7 +42,6 @@ def intersecting(x1,y1,r1,x2,y2,r2):
 	return 0
 
 def Extract_hands(stack_l,stack_r,no,no_l,no_r,area_img,iou_thr,frame,buffer_fps = 7):
-	print("YOYOYOY")
 	global c11,c21,radius1,c12,c22,radius2
 	if((no - no_r )%buffer_fps == 0):
 		stack_r.append((0,0,0))
@@ -52,40 +50,40 @@ def Extract_hands(stack_l,stack_r,no,no_l,no_r,area_img,iou_thr,frame,buffer_fps
 		stack_l.append((0,0,0))
 	# print(stack_l)
 	# no_p = 0
-	print(no)
-	print(no_l)
+	#print(no)
+	#print(no_l)
 	if(len(stack_l)==1):
 		(c11,c21,radius1) = stack_l.pop()
 	# stack_l.append((0,0,0))
-	print(no_r)
+	#print(no_r)
 	# print(stack_r)
 	if(len(stack_r)==1):
 		(c12,c22,radius2) = stack_r.pop()
 	# stack_r.append((0,0,0))
-	print("LLLLLLLLLLOOOOOOOOOOOOLLLLLLLLL")
-	print(radius1,radius2)
+	#print(radius1,radius2)
 	if ( radius1 and radius2 ):
 			
-		print("XXXXXXXXXXXXXXXXXXXXxxxxxxxxxxxxxXXXXXXXXxxxxxxxxxx")
+		print("----------------INTERSECTION------------------")
 		intersecting_area = intersecting(c11,c21,radius1,c21,c22,radius2)
 		
 		total_area = math.pi*(radius2**2 + radius1**2)
 		# iou_normalized = (iuo_area/(math.pi*radius*radius))*area_img
-		print("VVVVVVVVVVVVVVVVVVvvvvvvvvvvvvvvvvvvvvVVVVVVVVVVVVVv")
 		# print(np_p)
 		iou = intersecting_area/total_area
 		iou_normalized = iou/area_img
-		print("iou==========>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>",iou)
+		print("iou >>",iou)
 		print("iou_norm===================================================>>>>>>>",iou_normalized)
 		flag = False
-		if ((iou_normalized > iou_thr) and (y1 >= (y11 - (radius1+radius2)/2))):
+		if ((iou > iou_thr)):
 			flag = True
 
 		if(flag):
-			cv.putText(frame,"Rescuse Detected",(300, 20), cv.FONT_HERSHEY_SIMPLEX, 5, (0, 0, 255))
+			cv.putText(frame,"Rescuse Detected",(100, 20), cv.FONT_HERSHEY_SIMPLEX, 2, (0, 0, 255))
+			print("FOUND TRAPPED")
 			flag = False
 		else:
-			cv.putText(frame,"Searching for CHix",(100, 20), cv.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 0))
+			cv.putText(frame,"Searching",(100, 20), cv.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 0))
+			
 
 	
 
@@ -123,7 +121,6 @@ def hello():
 
 	stack_r = collections.deque(maxlen=1)
 	stack_l = collections.deque(maxlen=1)
-	print("XOXOX")
 	stack_r.append((0,0,0))
 	stack_l.append((0,0,0))
 
@@ -176,7 +173,6 @@ def hello():
 			idTo = BODY_PARTS[partTo]
 
 			if points[idFrom] and points[idTo]:
-				print("GENERALLLL")
 				cv.line(frame, points[idFrom], points[idTo], (0, 255, 0), 3)
 				no = no + 1
 				cv.ellipse(frame, points[idFrom], (3, 3), 0, 0, 360, (0, 0, 255), cv.FILLED)
@@ -195,12 +191,8 @@ def hello():
 					cv.circle(frame,(z11,z21),radius1,(0,0,100),-1)
 					# cv.circle(img1,centre,radius,(255,255,255),-1)  
 					no_l = no_l + 1
-					# cv.imshow('YSSSSSSS using OpenCV', img1)
-					print("stack left")
-					print(stack_l)
-					print(flag1)
 				if  ((idFrom == 6) and (idTo == 7)) or ((idFrom == 7) and (idTo == 6)):
-					print("detecting right hand ")
+					#print("detecting right hand ")
 					x3,y3 = points[6]
 					x4,y4 = points[7]
 					z12,z22 = (math.floor((x3+x4)/2),math.floor((y3+y4)/2))
@@ -210,24 +202,8 @@ def hello():
 					cv.circle(frame,(z12,z22),radius2,(0,0,100),-1)
 					# cv.circle(img2,centre,radius,(255,255,255),-1)
 					no_r = no_r + 1
-					# print(str(flag2)+" ok")
-					# cv.imshow('ZZZZZ using OpenCV', img2)
-					print("stack right")
-					print(stack_r)
 				if ((((idFrom == 3) and (idTo == 4)) or ((idFrom == 4) and (idTo == 3)))) or (((idFrom == 6) and (idTo == 7)) or ((idFrom == 7) and (idTo == 6))):
-					print("ZZZZZZZZZZZZZZzzzzzzzzzzzzZZZZZZZZZZZZZ")
 					stack_l,stack_r = Extract_hands(stack_l,stack_r,no,no_l,no_r,area_img,iou_thr,frame)
-			
-			# if (points[idFrom] and points[idTo]):
-				# print("GENERALLLL")
-				# cv.line(frame, points[idFrom], points[idTo], (0, 255, 0), 3)
-				# no = no + 1
-				# cv.ellipse(frame, points[idFrom], (3, 3), 0, 0, 360, (0, 0, 255), cv.FILLED)
-				# cv.ellipse(frame, points[idTo], (3, 3), 0, 0, 360, (0, 0, 255), cv.FILLED)
-				# stack_l,stack_r = Extract_hands(stack_l,stack_r,no,no_l,no_r)
-
-			# stack_l,stack_r = Extract_hands(stack_l,stack_r,no,no_l,no_r)
-
 
 		t, _ = net.getPerfProfile()
 		freq = cv.getTickFrequency() / 1000
