@@ -1,6 +1,3 @@
-# To use Inference Engine backend, specify location of plugins:
-# export LD_LIBRARY_PATH=/opt/intel/deeplearning_deploymenttoolkit/deployment_tools/external/mklml_lnx/lib:$LD_LIBRARY_PATH
-# usr/bin/bash -tt
 import cv2 as cv
 import numpy as np
 import argparse
@@ -16,8 +13,7 @@ stack_l.append((0,0,0))
 
 def calculateDistance(x1,y1,x2,y2):  
 	dist = math.sqrt((x2 - x1)**2 + (y2 - y1)**2)  
-	return dist  
-	# print calculateDistance(x1, y1, x2, y2)  
+	return dist
 
 def intersecting(x1,y1,r1,x2,y2,r2):
 	d = calculateDistance(x1,y1,x2,y2)
@@ -44,24 +40,16 @@ def intersecting(x1,y1,r1,x2,y2,r2):
 
 def Extract_hands(stack_l,stack_r,no,no_l,no_r,area_img,iou_thr,frame,buffer_fps = 7):
 	global c11,c21,radius1,c12,c22,radius2
+	count = 0
 	if((no - no_r )%buffer_fps == 0):
 		stack_r.append((0,0,0))
 
 	if((no - no_l )%buffer_fps == 0):
 		stack_l.append((0,0,0))
-	# print(stack_l)
-	# no_p = 0
-	#print(no)
-	#print(no_l)
 	if(len(stack_l)==1):
 		(c11,c21,radius1) = stack_l.pop()
-	# stack_l.append((0,0,0))
-	#print(no_r)
-	# print(stack_r)
 	if(len(stack_r)==1):
 		(c12,c22,radius2) = stack_r.pop()
-	# stack_r.append((0,0,0))
-	#print(radius1,radius2)
 	if ( radius1 and radius2 ):
 			
 		print("----------------INTERSECTION------------------")
@@ -78,12 +66,16 @@ def Extract_hands(stack_l,stack_r,no,no_l,no_r,area_img,iou_thr,frame,buffer_fps
 		if ((iou > iou_thr)):
 			flag = True
 
+		cv.putText(frame,"Searching",(100, 20), cv.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 0))
+
 		if(flag):
 			cv.putText(frame,"Rescuse Detected",(100, 20), cv.FONT_HERSHEY_SIMPLEX, 2, (0, 0, 255))
 			print("FOUND TRAPPED")
+			set_gps_location( count, frame, lat, lng)
+			count +=1
 			flag = False
-		else:
-			cv.putText(frame,"Searching",(100, 20), cv.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 0))
+		
+		
 			
 
 	
@@ -139,15 +131,11 @@ def hello():
 		frameWidth = frame.shape[1]
 		frameHeight = frame.shape[0]
 
-		# img1 = np.zeros((frameWidth,frameHeight))
-		# img2 = np.zeros((frameWidth,frameHeight))
-		
 		net.setInput(cv.dnn.blobFromImage(frame, 1.0, (inWidth, inHeight), (127.5, 127.5, 127.5), swapRB=True, crop=False))
 		out = net.forward()
 		out = out[:, :19, :, :]  # MobileNet output [1, 57, -1, -1], we only need the first 19 elements
 
 		assert(len(BODY_PARTS) == out.shape[1])
-
 
 		points = []
 		for i in range(len(BODY_PARTS)):
@@ -179,8 +167,6 @@ def hello():
 				cv.ellipse(frame, points[idFrom], (3, 3), 0, 0, 360, (0, 0, 255), cv.FILLED)
 				cv.ellipse(frame, points[idTo], (3, 3), 0, 0, 360, (0, 0, 255), cv.FILLED)
 				area_img = frameWidth * frameHeight
-				# stack_l,stack_r = Extract_hands(stack_l,stack_r,no,no_l,no_r)
-				# print(" pose")
 				if ((((idFrom == 3) and (idTo == 4)) or ((idFrom == 4) and (idTo == 3)))): #or (((idFrom == 6) and (idTo == 7)) or ((idFrom == 7) and (idTo == 6)))):
 					print("detecting left hand")
 					x1,y1 = points[3]
@@ -213,7 +199,7 @@ def hello():
 		cv.imshow('OpenPose using OpenCV', frame)
 
 #needs interfacing to be done for now
-def set_gps_location(file_name, lat, lng, altitude):
+def set_gps_location(file_name, frame, lat, lng, altitude):
     """Adds GPS position as EXIF metadata
     Keyword arguments:
     file_name -- image file
@@ -221,6 +207,9 @@ def set_gps_location(file_name, lat, lng, altitude):
     lng -- longitude (as float)
     altitude -- altitude (as float)
     """
+    file_name = str(file_name)+".jpg"
+    cv.imwrite(file_name, frame)
+
     lat_deg = to_deg(lat, ["S", "N"])
     lng_deg = to_deg(lng, ["W", "E"])
 
