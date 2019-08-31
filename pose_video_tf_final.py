@@ -13,6 +13,7 @@ stack_l = collections.deque(maxlen=1)
 stack_r = collections.deque(maxlen=1)
 stack_r.append((0,0,0))
 stack_l.append((0,0,0))
+
 def calculateDistance(x1,y1,x2,y2):  
 	dist = math.sqrt((x2 - x1)**2 + (y2 - y1)**2)  
 	return dist  
@@ -210,6 +211,35 @@ def hello():
 		cv.putText(frame, '%.2fms' % (t / freq), (10, 20), cv.FONT_HERSHEY_SIMPLEX, 0.5, (0, 0, 0))
 
 		cv.imshow('OpenPose using OpenCV', frame)
+
+#needs interfacing to be done for now
+def set_gps_location(file_name, lat, lng, altitude):
+    """Adds GPS position as EXIF metadata
+    Keyword arguments:
+    file_name -- image file
+    lat -- latitude (as float)
+    lng -- longitude (as float)
+    altitude -- altitude (as float)
+    """
+    lat_deg = to_deg(lat, ["S", "N"])
+    lng_deg = to_deg(lng, ["W", "E"])
+
+    exiv_lat = (change_to_rational(lat_deg[0]), change_to_rational(lat_deg[1]), change_to_rational(lat_deg[2]))
+    exiv_lng = (change_to_rational(lng_deg[0]), change_to_rational(lng_deg[1]), change_to_rational(lng_deg[2]))
+
+    gps_ifd = {
+        piexif.GPSIFD.GPSVersionID: (2, 0, 0, 0),
+        piexif.GPSIFD.GPSAltitudeRef: 1,
+        piexif.GPSIFD.GPSAltitude: change_to_rational(round(altitude)),
+        piexif.GPSIFD.GPSLatitudeRef: lat_deg[3],
+        piexif.GPSIFD.GPSLatitude: exiv_lat,
+        piexif.GPSIFD.GPSLongitudeRef: lng_deg[3],
+        piexif.GPSIFD.GPSLongitude: exiv_lng,
+    }
+
+    exif_dict = {"GPS": gps_ifd}
+    exif_bytes = piexif.dump(exif_dict)
+    piexif.insert(exif_bytes, file_name)
 
 if __name__ == '__main__':
 	hello()
