@@ -3,6 +3,10 @@ import numpy as np
 import argparse
 import math  
 import collections
+from dronekit import connect, VehicleMode, LocationGlobalRelative, LocationGlobal, Command
+import time
+import math
+from pymavlink import mavutil
 
 global stack_l
 global stack_r
@@ -71,6 +75,8 @@ def Extract_hands(stack_l,stack_r,no,no_l,no_r,area_img,iou_thr,frame,buffer_fps
 		if(flag):
 			cv.putText(frame,"Rescuse Detected",(100, 20), cv.FONT_HERSHEY_SIMPLEX, 2, (0, 0, 255))
 			print("FOUND TRAPPED")
+			lat =  vehicle.location.global_frame.lat
+			lon = vehicle.location.global_frame.lon
 			set_gps_location( count, frame, lat, lng)
 			count +=1
 			flag = False
@@ -231,4 +237,6 @@ def set_gps_location(file_name, frame, lat, lng, altitude):
     piexif.insert(exif_bytes, file_name)
 
 if __name__ == '__main__':
+	vehicle = connect("127.0.0.1:14550", wait_ready=True)
+	print("[INFO] Drone Check Complete")
 	hello()
